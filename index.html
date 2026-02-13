@@ -622,7 +622,7 @@
             type="text"
             id="habit-name-input"
             class="input"
-            placeholder="Add new habit (e.g. 60m Deep Work, Training, Sleep 7h)"
+            placeholder="Add new habit (e.g. Protein target hit, Calls made)"
             autocomplete="off"
           />
           <button type="submit" class="btn">
@@ -752,9 +752,19 @@
     function ensureDefaults() {
       if (state.habits.length === 0) {
         state.habits = [
-          { id: "deep-work", name: "60m Deep Work", createdAt: dateKey(today), completions: {} },
-          { id: "training", name: "Training Session", createdAt: dateKey(today), completions: {} },
-          { id: "sleep", name: "Sleep 7h+", createdAt: dateKey(today), completions: {} },
+          { id: "wake-0550", name: "Réveil 05:50", createdAt: dateKey(today), completions: {} },
+          { id: "sleep-2045", name: "Dormir 20:45", createdAt: dateKey(today), completions: {} },
+          { id: "deep-work-3h", name: "Deep work 3h", createdAt: dateKey(today), completions: {} },
+          { id: "hours-on-goal", name: "Hours worked on \"Goal\" (tracked)", createdAt: dateKey(today), completions: {} },
+          { id: "tracking", name: "Daily tracking done", createdAt: dateKey(today), completions: {} },
+          { id: "meditation-10m", name: "10min meditation", createdAt: dateKey(today), completions: {} },
+          { id: "journal", name: "Journal", createdAt: dateKey(today), completions: {} },
+          { id: "gym-recovery", name: "🏋️ gym/recovery", createdAt: dateKey(today), completions: {} },
+          { id: "blocage-effectif", name: "Blocage effectif", createdAt: dateKey(today), completions: {} },
+          { id: "time-boxed", name: "Time boxed", createdAt: dateKey(today), completions: {} },
+          { id: "food-tracking", name: "Food tracking", createdAt: dateKey(today), completions: {} },
+          { id: "money-tracking", name: "Money tracking", createdAt: dateKey(today), completions: {} },
+          { id: "read-3m", name: "3min read", createdAt: dateKey(today), completions: {} },
         ];
         saveData(state);
       }
