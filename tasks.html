@@ -45,6 +45,40 @@
       max-width: 1200px;
     }
 
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: inline-flex;
+      gap: 8px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 2px 8px;
+      border-radius: 999px;
+      transition: background 0.16s, color 0.16s;
+    }
+
+    .nav-links a.active,
+    .nav-links a:hover {
+      background: rgba(248, 171, 88, 0.18);
+      color: var(--text-main);
+    }
+
     header {
       display: flex;
       justify-content: space-between;
@@ -454,6 +488,14 @@
 </head>
 <body>
   <div class="app">
+    <div class="top-nav">
+      <div>Vox · Mass Code tools</div>
+      <div class="nav-links">
+        <a href="index.html">Habits</a>
+        <a href="tasks.html" class="active">Tasks</a>
+      </div>
+    </div>
+
     <header>
       <div class="head-left">
         <h1>MASS CODE OPS</h1>
