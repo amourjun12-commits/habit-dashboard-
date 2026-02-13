@@ -605,9 +605,14 @@
             <h3>This Week</h3>
             <span id="week-range"></span>
           </div>
-          <button id="reset-week" class="btn-ghost">
-            <span>Clear this week</span>
-          </button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+            <button id="reset-week" class="btn-ghost">
+              <span>Clear this week</span>
+            </button>
+            <button id="reset-habits" class="btn-ghost">
+              <span>Reset habits</span>
+            </button>
+          </div>
         </div>
 
         <div class="section-title">
@@ -1127,6 +1132,16 @@
       saveData(state);
       renderHabits();
     });
+
+    const resetHabitsBtn = document.getElementById("reset-habits");
+    if (resetHabitsBtn) {
+      resetHabitsBtn.addEventListener("click", () => {
+        if (!confirm("Reset habits list to Vox defaults? This clears all your habit history.")) return;
+        state = { habits: [], createdAt: dateKey(today) };
+        ensureDefaults();
+        renderHabits();
+      });
+    }
 
     renderHeader();
     renderHabits();
