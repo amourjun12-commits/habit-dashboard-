@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Habit Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-elevated: #0b1020;
+      --accent: #4f46e5;
+      --accent-soft: rgba(79, 70, 229, 0.15);
+      --accent-strong: rgba(79, 70, 229, 0.35);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+      --success: #22c55e;
+      --border-subtle: #1f2933;
+      --card-radius: 18px;
+      --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.75);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #111827 0, #020617 40%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .title-block h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .title-pill {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-soft), transparent);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .today-chip {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #111827;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .today-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #111827, #020617);
+      border-radius: var(--card-radius);
+      border: 1px solid #111827;
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -120px;
+      opacity: 0.16;
+      background: radial-gradient(circle at top right, var(--accent-strong), transparent);
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-header h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .card-header span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--success);
+    }
+
+    .pill-danger {
+      border-color: rgba(248, 113, 113, 0.35);
+      color: #fecaca;
+    }
+    .pill-danger .pill-dot {
+      background: var(--danger);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title strong {
+      color: var(--text-main);
+      font-size: 0.82rem;
+    }
+
+    .habits-list {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-bottom: 6px;
+    }
+
+    .habit-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) repeat(7, 26px);
+      align-items: center;
+      gap: 8px;
+      padding: 8px 9px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(30, 64, 175, 0.3);
+      transition: border-color 0.2s, background 0.2s, transform 0.08s;
+    }
+
+    .habit-row:hover {
+      border-color: var(--accent);
+      background: rgba(15, 23, 42, 1);
+      transform: translateY(-1px);
+    }
+
+    .habit-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .habit-name {
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .habit-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      font-size: 0.7rem;
+    }
+
+    .meta-pill strong {
+      color: var(--text-main);
+    }
+
+    .weekday-label {
+      font-size: 0.68rem;
+      text-align: center;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    .day-cell {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.16s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .day-cell.today {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.4);
+    }
+
+    .day-cell.completed {
+      background: radial-gradient(circle at top, #22c55e, #15803d);
+      border-color: rgba(34, 197, 94, 0.9);
+      color: white;
+      box-shadow: 0 10px 28px rgba(22, 163, 74, 0.65);
+    }
+
+    .day-cell.completed::after {
+      content: "✓";
+      position: absolute;
+      font-size: 0.8rem;
+    }
+
+    .day-cell:hover:not(.completed) {
+      border-color: rgba(148, 163, 184, 0.9);
+      background: rgba(31, 41, 55, 0.9);
+    }
+
+    .day-cell .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.7);
+    }
+
+    .add-habit-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+
+    .input {
+      flex: 1;
+      min-width: 160px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    }
+
+    .input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.65);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent), #818cf8);
+      border-radius: 999px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 16px 34px rgba(79, 70, 229, 0.55);
+      transition: transform 0.08s ease-out, box-shadow 0.12s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 36px rgba(79, 70, 229, 0.8);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 26px rgba(79, 70, 229, 0.5);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: background 0.16s, border-color 0.16s, color 0.16s;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(17, 24, 39, 1);
+      border-color: var(--accent);
+      color: var(--text-main);
+    }
+
+    .overall-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 540px) {
+      .overall-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .stat-card {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(30, 64, 175, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .progress-bar {
+      margin-top: 4px;
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 1);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), #22c55e);
+      width: 0%;
+      transition: width 0.2s ease-out;
+    }
+
+    .streak-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .streak-row strong {
+      font-size: 0.82rem;
+    }
+
+    .pill-soft {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .heatmap {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(31, 41, 55, 0.9);
+      position: relative;
+      z-index: 1;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .heat-cell {
+      height: 18px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 1);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .heat-cell-inner {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(79, 70, 229, 0.3));
+      opacity: 0;
+      transition: opacity 0.18s;
+    }
+
+    .heat-cell.level-1 .heat-cell-inner {
+      opacity: 0.3;
+    }
+    .heat-cell.level-2 .heat-cell-inner {
+      opacity: 0.55;
+    }
+    .heat-cell.level-3 .heat-cell-inner {
+      opacity: 0.85;
+    }
+
+    .heat-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(30, 64, 175, 0.7);
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <h1>MASS CODE SYSTEM</h1>
+        <h2>
+          Daily Habit Dashboard
+          <span class="title-pill">Designed for hardgainers who actually track</span>
+        </h2>
+      </div>
+      <div class="today-chip">
+        <span class="today-dot"></span>
+        <span id="today-label">Today</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Left: habits + week -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h3>This Week</h3>
+            <span id="week-range"></span>
+          </div>
+          <button id="reset-week" class="btn-ghost">
+            <span>Clear this week</span>
+          </button>
+        </div>
+
+        <div class="section-title">
+          <strong>Core habits</strong>
+          <span id="summary-line"></span>
+        </div>
+
+        <div class="habits-list" id="habits-list"></div>
+
+        <form class="add-habit-form" id="add-habit-form">
+          <input
+            type="text"
+            id="habit-name-input"
+            class="input"
+            placeholder="Add new habit (e.g. 60m Deep Work, Training, Sleep 7h)"
+            autocomplete="off"
+          />
+          <button type="submit" class="btn">
+            <span>+ Add</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Right: stats -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h3>Consistency Panel</h3>
+            <span>Streaks & load for this week</span>
+          </div>
+          <span id="week-status-pill" class="pill">
+            <span class="pill-dot"></span>
+            <span id="week-status-text">Warming up</span>
+          </span>
+        </div>
+
+        <div class="streak-row">
+          <div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <strong>Current streak</strong>
+            </div>
+            <div class="stat-sub" id="streak-description">
+              —
+            </div>
+          </div>
+          <div class="pill-soft" id="streak-pill">
+            <span>🔥</span>
+            <span id="streak-days">0 days</span>
+          </div>
+        </div>
+
+        <div class="overall-stats">
+          <div class="stat-card">
+            <div class="stat-label">Weekly completion</div>
+            <div class="stat-value" id="weekly-completion">0%</div>
+            <div class="stat-sub">All habits · all days</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="weekly-progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Today</div>
+            <div class="stat-value" id="today-score">0 / 0</div>
+            <div class="stat-sub" id="today-score-sub">No habits yet</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="today-progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Loaded habits</div>
+            <div class="stat-value" id="habit-count">0</div>
+            <div class="stat-sub">Active on this dashboard</div>
+          </div>
+        </div>
+
+        <div class="heatmap">
+          <div class="heat-labels">
+            <span>Training load preview</span>
+            <span id="heat-caption"></span>
+          </div>
+          <div class="heatmap-grid" id="heatmap-grid"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "masscode_habits_v1";
+
+    function getToday() {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function startOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function addDays(date, n) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + n);
+      return d;
+    }
+
+    function formatDateShort(date) {
+      const opts = { day: "numeric", month: "short" };
+      return date.toLocaleDateString(undefined, opts);
+    }
+
+    function dateKey(date) {
+      return date.toISOString().slice(0, 10);
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { habits: [], createdAt: dateKey(getToday()) };
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.habits)) parsed.habits = [];
+        return parsed;
+      } catch (e) {
+        return { habits: [], createdAt: dateKey(getToday()) };
+      }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    let state = loadData();
+    const today = getToday();
+    const weekStart = startOfWeek(today);
+
+    function ensureDefaults() {
+      if (state.habits.length === 0) {
+        state.habits = [
+          { id: "deep-work", name: "60m Deep Work", createdAt: dateKey(today), completions: {} },
+          { id: "training", name: "Training Session", createdAt: dateKey(today), completions: {} },
+          { id: "sleep", name: "Sleep 7h+", createdAt: dateKey(today), completions: {} },
+        ];
+        saveData(state);
+      }
+    }
+
+    ensureDefaults();
+
+    const habitsListEl = document.getElementById("habits-list");
+    const weekRangeEl = document.getElementById("week-range");
+    const todayLabelEl = document.getElementById("today-label");
+    const summaryLineEl = document.getElementById("summary-line");
+    const weeklyCompletionEl = document.getElementById("weekly-completion");
+    const weeklyProgressFillEl = document.getElementById("weekly-progress-fill");
+    const todayScoreEl = document.getElementById("today-score");
+    const todayScoreSubEl = document.getElementById("today-score-sub");
+    const todayProgressFillEl = document.getElementById("today-progress-fill");
+    const habitCountEl = document.getElementById("habit-count");
+    const heatmapGridEl = document.getElementById("heatmap-grid");
+    const heatCaptionEl = document.getElementById("heat-caption");
+    const weekStatusPillEl = document.getElementById("week-status-pill");
+    const weekStatusTextEl = document.getElementById("week-status-text");
+    const streakDaysEl = document.getElementById("streak-days");
+    const streakDescriptionEl = document.getElementById("streak-description");
+    const streakPillEl = document.getElementById("streak-pill");
+
+    function renderHeader() {
+      todayLabelEl.textContent = today.toLocaleDateString(undefined, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      });
+      const endOfWeek = addDays(weekStart, 6);
+      weekRangeEl.textContent = `${formatDateShort(weekStart)} – ${formatDateShort(endOfWeek)}`;
+    }
+
+    function buildWeekDays() {
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = addDays(weekStart, i);
+        days.push({
+          date: d,
+          key: dateKey(d),
+          label: d.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 2),
+        });
+      }
+      return days;
+    }
+
+    const weekDays = buildWeekDays();
+
+    function renderHabits() {
+      habitsListEl.innerHTML = "";
+
+      const habitCount = state.habits.length;
+      habitCountEl.textContent = habitCount.toString();
+
+      if (habitCount === 0) {
+        const empty = document.createElement("div");
+        empty.style.fontSize = "0.85rem";
+        empty.style.color = "var(--text-muted)";
+        empty.style.padding = "4px 2px 10px";
+        empty.textContent =
+          "Add at least one habit below to start tracking your week.";
+        habitsListEl.appendChild(empty);
+        updateStats();
+        return;
+      }
+
+      const weekdayHeader = document.createElement("div");
+      weekdayHeader.className = "habit-row";
+      weekdayHeader.style.background = "transparent";
+      weekdayHeader.style.border = "none";
+      weekdayHeader.style.marginBottom = "-4px";
+      weekdayHeader.style.pointerEvents = "none";
+      weekdayHeader.innerHTML = `
+        <div></div>
+        ${weekDays
+          .map(
+            (d) =>
+              `<div class="weekday-label">${d.label.toUpperCase()}</div>`
+          )
+          .join("")}
+      `;
+      habitsListEl.appendChild(weekdayHeader);
+
+      for (const habit of state.habits) {
+        const row = document.createElement("div");
+        row.className = "habit-row";
+
+        const main = document.createElement("div");
+        main.className = "habit-main";
+
+        const nameEl = document.createElement("div");
+        nameEl.className = "habit-name";
+        nameEl.textContent = habit.name;
+
+        const meta = document.createElement("div");
+        meta.className = "habit-meta";
+
+        const firstDate =
+          habit.createdAt ||
+          Object.keys(habit.completions || {}).sort()[0] ||
+          dateKey(today);
+
+        const daysTracked =
+          Math.floor(
+            (today.getTime() - new Date(firstDate).getTime()) / 86400000
+          ) + 1;
+
+        const totalCompletions = Object.keys(habit.completions || {}).length;
+
+        const completionRate =
+          daysTracked > 0 ? Math.round((totalCompletions / daysTracked) * 100) : 0;
+
+        const createdPill = document.createElement("span");
+        createdPill.className = "meta-pill";
+        createdPill.textContent = `tracking since ${formatDateShort(
+          new Date(firstDate)
+        )}`;
+
+        const ratePill = document.createElement("span");
+        ratePill.className = "meta-pill";
+        ratePill.innerHTML = `<strong>${completionRate}%</strong> lifetime consistency`;
+
+        meta.appendChild(createdPill);
+        meta.appendChild(ratePill);
+
+        main.appendChild(nameEl);
+        main.appendChild(meta);
+        row.appendChild(main);
+
+        for (const d of weekDays) {
+          const cell = document.createElement("div");
+          cell.className = "day-cell";
+
+          if (dateKey(d.date) === dateKey(today)) {
+            cell.classList.add("today");
+          }
+
+          const completed = habit.completions?.[d.key];
+          if (completed) {
+            cell.classList.add("completed");
+          } else {
+            const dot = document.createElement("div");
+            dot.className = "dot";
+            cell.appendChild(dot);
+          }
+
+          cell.title = `${habit.name} · ${d.date.toLocaleDateString()}`;
+
+          cell.addEventListener("click", () => {
+            toggleCompletion(habit.id, d.key);
+          });
+
+          row.appendChild(cell);
+        }
+
+        habitsListEl.appendChild(row);
+      }
+
+      updateStats();
+    }
+
+    function toggleCompletion(habitId, dayKey) {
+      const habit = state.habits.find((h) => h.id === habitId);
+      if (!habit) return;
+
+      if (!habit.completions) habit.completions = {};
+
+      if (habit.completions[dayKey]) {
+        delete habit.completions[dayKey];
+      } else {
+        habit.completions[dayKey] = true;
+      }
+
+      saveData(state);
+      renderHabits();
+    }
+
+    function computeStats() {
+      const totalHabitDays = state.habits.length * 7;
+      let completedHabitDays = 0;
+
+      let todayCompleted = 0;
+      let todayTotal = state.habits.length;
+
+      const todayKeyVal = dateKey(today);
+
+      for (const habit of state.habits) {
+        for (const d of weekDays) {
+          if (habit.completions?.[d.key]) completedHabitDays++;
+        }
+        if (habit.completions?.[todayKeyVal]) todayCompleted++;
+      }
+
+      const weeklyPct =
+        totalHabitDays > 0
+          ? Math.round((completedHabitDays / totalHabitDays) * 100)
+          : 0;
+
+      const streak = computeStreak();
+
+      return {
+        weeklyPct,
+        todayCompleted,
+        todayTotal,
+        completedHabitDays,
+        totalHabitDays,
+        streak,
+      };
+    }
+
+    function computeStreak() {
+      if (state.habits.length === 0) return 0;
+
+      let streak = 0;
+      let cursor = new Date(today);
+
+      while (true) {
+        const k = dateKey(cursor);
+
+        const allDone = state.habits.every(
+          (h) => h.completions && h.completions[k]
+        );
+        if (!allDone) break;
+
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+
+      return streak;
+    }
+
+    function updateStats() {
+      const { weeklyPct, todayCompleted, todayTotal, streak } = computeStats();
+
+      weeklyCompletionEl.textContent = `${weeklyPct}%`;
+      weeklyProgressFillEl.style.width = `${weeklyPct}%`;
+
+      if (weeklyPct >= 80) {
+        weekStatusTextEl.textContent = "Dialed in";
+        weekStatusPillEl.classList.remove("pill-danger");
+      } else if (weeklyPct >= 50) {
+        weekStatusTextEl.textContent = "On the board";
+        weekStatusPillEl.classList.remove("pill-danger");
+      } else {
+        weekStatusTextEl.textContent = "Below standard";
+        weekStatusPillEl.classList.add("pill-danger");
+      }
+
+      if (todayTotal === 0) {
+        todayScoreEl.textContent = "0 / 0";
+        todayScoreSubEl.textContent = "No habits configured for today";
+        todayProgressFillEl.style.width = "0%";
+      } else {
+        const pct = Math.round((todayCompleted / todayTotal) * 100);
+        todayScoreEl.textContent = `${todayCompleted} / ${todayTotal}`;
+        todayScoreSubEl.textContent =
+          pct === 100
+            ? "Perfect day. Move on."
+            : pct === 0
+            ? "Nothing on the board yet."
+            : `${pct}% of today locked in.`;
+        todayProgressFillEl.style.width = `${pct}%`;
+      }
+
+      streakDaysEl.textContent = `${streak} day${streak === 1 ? "" : "s"}`;
+      if (streak === 0) {
+        streakDescriptionEl.textContent = "No full days streak yet. Start with today.";
+        streakPillEl.style.borderColor = "rgba(148, 163, 184, 0.6)";
+      } else if (streak < 4) {
+        streakDescriptionEl.textContent = "You’ve got a small chain. Don’t break it.";
+        streakPillEl.style.borderColor = "rgba(74, 222, 128, 0.7)";
+      } else {
+        streakDescriptionEl.textContent = "You’re in a run. Protect it at all costs.";
+        streakPillEl.style.borderColor = "rgba(34, 197, 94, 1)";
+      }
+
+      summaryLineEl.textContent =
+        state.habits.length === 0
+          ? ""
+          : `${state.habits.length} active habits · ${weeklyPct}% of this week filled`;
+
+      renderHeatmap();
+    }
+
+    function renderHeatmap() {
+      heatmapGridEl.innerHTML = "";
+      const counts = weekDays.map((d) => {
+        let c = 0;
+        for (const h of state.habits) {
+          if (h.completions?.[d.key]) c++;
+        }
+        return c;
+      });
+
+      const max = Math.max(...counts, 0);
+      let total = 0;
+      counts.forEach((c) => (total += c));
+
+      const avg = weekDays.length > 0 ? total / weekDays.length : 0;
+
+      for (let i = 0; i < weekDays.length; i++) {
+        const cell = document.createElement("div");
+        cell.className = "heat-cell";
+        const inner = document.createElement("div");
+        inner.className = "heat-cell-inner";
+
+        const val = counts[i];
+        let level = 0;
+        if (max > 0) {
+          const ratio = val / max;
+          if (ratio >= 0.75) level = 3;
+          else if (ratio >= 0.4) level = 2;
+          else if (ratio > 0) level = 1;
+        }
+
+        if (level > 0) cell.classList.add(`level-${level}`);
+
+        cell.appendChild(inner);
+        heatmapGridEl.appendChild(cell);
+      }
+
+      heatCaptionEl.textContent =
+        max === 0
+          ? "No completion data yet"
+          : `Avg ${avg.toFixed(1)} habits/day · max ${max} in a single day`;
+    }
+
+    document
+      .getElementById("add-habit-form")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = document.getElementById("habit-name-input");
+        const name = input.value.trim();
+        if (!name) return;
+
+        const id = `${Date.now()}_${Math.random().toString(16).slice(2, 7)}`;
+
+        state.habits.push({
+          id,
+          name,
+          createdAt: dateKey(today),
+          completions: {},
+        });
+
+        saveData(state);
+        input.value = "";
+        renderHabits();
+      });
+
+    document.getElementById("reset-week").addEventListener("click", () => {
+      if (!confirm("Clear all checkmarks for this week only?")) return;
+      for (const habit of state.habits) {
+        if (!habit.completions) continue;
+        for (const d of weekDays) {
+          if (habit.completions[d.key]) delete habit.completions[d.key];
+        }
+      }
+      saveData(state);
+      renderHabits();
+    });
+
+    renderHeader();
+    renderHabits();
+  </script>
+</body>
+</html>
